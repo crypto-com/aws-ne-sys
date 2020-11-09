@@ -1,0 +1,6 @@
+This project is extracted from the following repository:
+
+* Aws Certificate Manager for Nitro Enclaves
+ * Copyright: Copyright (c) 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * License: Apache License 2.0
+ * Repository: https://github.com/aws/aws-nitro-enclaves-acm.git
