@@ -1,9 +1,10 @@
 [package]
 name = "aws-ne-sys"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Tomas Tauber", "Dan Horobeanu <dhr@amazon.com>"]
 edition = "2018"
 license = "Apache-2.0"
 description = "AWS KMS decrypt FFI wrapper for Nitro Enclaves (from aws-nitro-enclaves-acm repo)"
+repository = "https://github.com/crypto-com/aws-ne-sys"
 
 [dependencies]

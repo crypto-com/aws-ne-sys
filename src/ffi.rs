@@ -86,4 +86,6 @@ extern "C" {
         ciphertext: *const aws_byte_buf,
         plaintext: *mut aws_byte_buf,
     ) -> c_int;
+
+    pub fn aws_nitro_enclaves_library_seed_entropy(bytes: usize) -> c_int;
 }

@@ -169,3 +169,13 @@ pub fn kms_decrypt(
 
     Ok(plaintext)
 }
+
+/// FFI wrapper to seed initial entropy using NSM
+pub fn seed_entropy(bytes_to_seed: usize) -> Result<(), ()> {
+    let rc = unsafe { ffi::aws_nitro_enclaves_library_seed_entropy(bytes_to_seed) };
+    if rc == 0 {
+        Ok(())
+    } else {
+        Err(())
+    }
+}
