@@ -1,5 +1,6 @@
 // Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
+// Modifications Copyright (c) 2021, Foris Limited (licensed under the Apache License, Version 2.0)
 
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
@@ -88,4 +89,10 @@ extern "C" {
     ) -> c_int;
 
     pub fn aws_nitro_enclaves_library_seed_entropy(bytes: usize) -> c_int;
+
+    pub fn aws_kms_encrypt_blocking(
+        client: *mut aws_nitro_enclaves_kms_client,
+        plaintext: *const aws_byte_buf,
+        ciphertext: *mut aws_byte_buf,
+    ) -> c_int;
 }
