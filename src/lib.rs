@@ -4,12 +4,14 @@
 
 mod ffi;
 
+#[derive(Debug)]
 pub enum Error {
     SdkInitError,
     SdkGenericError,
     SdkKmsConfigError,
     SdkKmsClientError,
-    SdkKmsDecryptError,
+    SdkKmsDecryptError(i32),
+    SdkKmsEncryptError(i32),
 }
 
 /// KMS decrypt FFI wrapper
@@ -148,7 +150,7 @@ pub fn kms_decrypt(
             ffi::aws_nitro_enclaves_kms_client_destroy(kms_client);
             ffi::aws_nitro_enclaves_library_clean_up();
         }
-        return Err(Error::SdkKmsDecryptError);
+        return Err(Error::SdkKmsDecryptError(rc));
     }
 
     // Cleanup
@@ -317,7 +319,7 @@ pub fn kms_encrypt(
             ffi::aws_nitro_enclaves_kms_client_destroy(kms_client);
             ffi::aws_nitro_enclaves_library_clean_up();
         }
-        return Err(Error::SdkKmsDecryptError);
+        return Err(Error::SdkKmsEncryptError(rc));
     }
 
     // Cleanup
