@@ -92,6 +92,7 @@ extern "C" {
 
     pub fn aws_kms_encrypt_blocking(
         client: *mut aws_nitro_enclaves_kms_client,
+        key_id: *const aws_string,
         plaintext: *const aws_byte_buf,
         ciphertext: *mut aws_byte_buf,
     ) -> c_int;

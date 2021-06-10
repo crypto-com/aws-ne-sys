@@ -4,12 +4,14 @@
 
 mod ffi;
 
+#[derive(Debug)]
 pub enum Error {
     SdkInitError,
     SdkGenericError,
     SdkKmsConfigError,
     SdkKmsClientError,
     SdkKmsDecryptError,
+    SdkKmsEncryptError,
 }
 
 /// KMS decrypt FFI wrapper
@@ -188,6 +190,7 @@ pub fn kms_encrypt(
     aws_key_id: &[u8],
     aws_secret_key: &[u8],
     aws_session_token: &[u8],
+    aws_kms_key_id: &[u8],
     plaintext: &[u8],
 ) -> Result<Vec<u8>, Error> {
     // Initialize the SDK
@@ -263,6 +266,24 @@ pub fn kms_encrypt(
         }
         sess_token
     };
+    // AWS KMS Key ID
+    let kms_key_id = unsafe {
+        let kms_kid = ffi::aws_string_new_from_array(
+            allocator,
+            aws_kms_key_id.as_ptr(),
+            aws_kms_key_id.len(),
+        );
+        if kms_kid.is_null() {
+            ffi::aws_string_destroy_secure(secret_key);
+            ffi::aws_string_destroy_secure(key_id);
+            ffi::aws_string_destroy_secure(region);
+            ffi::aws_string_destroy_secure(session_token);
+            ffi::aws_nitro_enclaves_library_clean_up();
+            return Err(Error::SdkGenericError);
+        }
+        kms_kid
+    };
+
     // Construct KMS client configuration
     let kms_client_cfg = unsafe {
         // Configure
@@ -280,6 +301,7 @@ pub fn kms_encrypt(
             ffi::aws_string_destroy_secure(secret_key);
             ffi::aws_string_destroy_secure(session_token);
             ffi::aws_string_destroy_secure(region);
+            ffi::aws_string_destroy_secure(kms_key_id);
             ffi::aws_nitro_enclaves_library_clean_up();
             return Err(Error::SdkKmsConfigError);
         }
@@ -293,6 +315,7 @@ pub fn kms_encrypt(
             ffi::aws_string_destroy_secure(secret_key);
             ffi::aws_string_destroy_secure(session_token);
             ffi::aws_string_destroy_secure(region);
+            ffi::aws_string_destroy_secure(kms_key_id);
             ffi::aws_nitro_enclaves_kms_client_config_destroy(kms_client_cfg);
             ffi::aws_nitro_enclaves_library_clean_up();
         }
@@ -305,19 +328,21 @@ pub fn kms_encrypt(
 
     // Encrypt
     let mut ciphertext_buf: ffi::aws_byte_buf = unsafe { std::mem::zeroed() };
-    let rc =
-        unsafe { ffi::aws_kms_encrypt_blocking(kms_client, &plaintext_buf, &mut ciphertext_buf) };
+    let rc = unsafe {
+        ffi::aws_kms_encrypt_blocking(kms_client, kms_key_id, &plaintext_buf, &mut ciphertext_buf)
+    };
     if rc != 0 {
         unsafe {
             ffi::aws_string_destroy_secure(key_id);
             ffi::aws_string_destroy_secure(secret_key);
             ffi::aws_string_destroy_secure(session_token);
             ffi::aws_string_destroy_secure(region);
+            ffi::aws_string_destroy_secure(kms_key_id);
             ffi::aws_nitro_enclaves_kms_client_config_destroy(kms_client_cfg);
             ffi::aws_nitro_enclaves_kms_client_destroy(kms_client);
             ffi::aws_nitro_enclaves_library_clean_up();
         }
-        return Err(Error::SdkKmsDecryptError);
+        return Err(Error::SdkKmsEncryptError);
     }
 
     // Cleanup
@@ -326,6 +351,7 @@ pub fn kms_encrypt(
         ffi::aws_string_destroy_secure(secret_key);
         ffi::aws_string_destroy_secure(session_token);
         ffi::aws_string_destroy_secure(region);
+        ffi::aws_string_destroy_secure(kms_key_id);
         ffi::aws_nitro_enclaves_kms_client_config_destroy(kms_client_cfg);
         ffi::aws_nitro_enclaves_kms_client_destroy(kms_client);
         ffi::aws_nitro_enclaves_library_clean_up();
