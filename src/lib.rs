@@ -1,6 +1,6 @@
 // Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Modifications Copyright (c) 2021, Foris Limited (licensed under the Apache License, Version 2.0)
+// Modifications Copyright (c) 2021, Crypto.com (licensed under the Apache License, Version 2.0)
 
 mod ffi;
 
